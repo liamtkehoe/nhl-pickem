@@ -1,4 +1,4 @@
-package io.github.liamtkehoe.nhl_pickem;
+package io.github.liamtkehoe.nhl_pickem.web;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;

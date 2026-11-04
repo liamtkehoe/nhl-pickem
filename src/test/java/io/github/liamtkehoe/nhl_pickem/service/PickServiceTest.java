@@ -25,7 +25,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.annotation.Transactional;
 
-@SpringBootTest(properties = "spring.datasource.url=jdbc:sqlite:target/test-pickem.db")
+@SpringBootTest(properties = {
+        "spring.datasource.url=jdbc:sqlite:target/test-pickem.db",
+        "pickem.sync.enabled=false"
+})
 @Transactional
 class PickServiceTest {
     private static final int SEASON = SeasonSeeder.PRACTICE_SEASON;
