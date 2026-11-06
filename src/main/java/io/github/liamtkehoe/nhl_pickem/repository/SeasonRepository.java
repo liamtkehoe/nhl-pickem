@@ -14,7 +14,7 @@ public class SeasonRepository {
         this.jdbc = jdbc;
     }
 
-    /** Inserts the season, or updates it if it already exists. */
+    //Inserts the season, or updates it if it already exists
     public void save(Season season) {
         jdbc.sql("INSERT INTO seasons (id, is_practice, picks_close_at) VALUES (:id, :practice, :closeAt)\n"
                         + "ON CONFLICT(id)\n" +

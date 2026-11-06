@@ -26,7 +26,7 @@ public class PickRepository {
                 .map(Db::instant);
     }
 
-    /** Writes the submission row and every pick. Call inside a transaction */
+    //Writes the submission row and every pick. Call inside a transaction
     public void insertAll(long userId, int seasonId, PickSet picks, Instant submittedAt) {
         jdbc.sql("INSERT INTO submissions (user_id, season_id, submitted_at) VALUES (:u, :s, :at)")
                 .param("u", userId)
@@ -106,5 +106,19 @@ public class PickRepository {
                 .list();
 
         return new PickSet(standings, overUnders, awards);
+    }
+
+    //List of total submissions in a season
+    public List<Submission> submissions(int seasonId) {
+        return jdbc.sql("SELECT s.user_id, u.username, s.submitted_at FROM submissions s\n" +
+                        "JOIN users u ON u.id = s.user_id\n" +
+                        "WHERE s.season_id = :s\n" +
+                        "ORDER BY s.submitted_at")
+                .param("s", seasonId)
+                .query((rs, row) -> new Submission(
+                        rs.getLong("user_id"),
+                        rs.getString("username"),
+                        Db.instant(rs.getString("submitted_at"))))
+                .list();
     }
 }

@@ -41,7 +41,7 @@ public class NhlSyncService {
         this.enabled = enabled;
     }
 
-    /** First sync, once the app has fully started */
+    //First sync, once the app has fully started
     @EventListener(ApplicationReadyEvent.class)
     public void syncOnStartup() {
         if (!enabled) {

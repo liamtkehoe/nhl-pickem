@@ -20,8 +20,20 @@ public enum Award {
         return displayName;
     }
 
-    /** Jack Adams is picked as a team; every other award as a player*/
+    //Jack Adams is picked as a team; every other award as a player*/
     public boolean isTeamPick() {
         return this == JACK_ADAMS;
+    }
+
+    //Returns whether a player at this position can be picked. Positions: C, L, R, D, or G
+    public boolean allowsPosition(String position) {
+        return switch (this) {
+            case VEZINA -> position.equals("G");
+            case NORRIS -> position.equals("D");
+            case SELKE -> position.equals("C") || position.equals("L") || position.equals("R");
+            case ART_ROSS, ROCKET_RICHARD -> !position.equals("G");
+            case HART, CALDER -> true;   // Calder's rookie check arrives with player stats in Phase 7
+            case JACK_ADAMS -> false;    // a team pick, not a player
+        };
     }
 }

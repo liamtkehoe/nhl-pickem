@@ -1,0 +1,11 @@
+{
+  "season": 20262027,
+  "source": "BetOnline opening board (via StatSniper)",
+  "asOf": "2026-07-20",
+  "lines": {
+    "FLA": 107.5, "TBL": 102.5, "MTL": 98.5, "BUF": 96.5, "TOR": 95.5, "OTT": 94.5, "BOS": 89.5, "DET": 86.5,
+    "CAR": 107.5, "WSH": 99.5, "NJD": 95.5, "PHI": 93.5, "CBJ": 91.5, "PIT": 91.5, "NYI": 88.5, "NYR": 86.5,
+    "COL": 107.5, "MIN": 101.5, "DAL": 100.5, "UTA": 96.5, "WPG": 88.5, "NSH": 85.5, "STL": 84.5, "CHI": 78.5,
+    "EDM": 104.5, "VGK": 103.5, "LAK": 95.5, "ANA": 95.5, "SJS": 94.5, "SEA": 81.5, "CGY": 77.5, "VAN": 74.5
+  }
+}
