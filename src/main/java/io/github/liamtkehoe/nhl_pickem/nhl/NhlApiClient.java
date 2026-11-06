@@ -20,7 +20,7 @@ public class NhlApiClient {
         return body == null || body.standings() == null ? List.of() : body.standings();
     }
 
-    /** Forwards, defensemen and goalies combined into one list. */
+    //Forwards, defensemen and goalies combined into one list
     public List<NhlRosterPlayer> currentRoster(String team) {
         RosterResponse body = http.get()
                 .uri("/roster/{team}/current", team)

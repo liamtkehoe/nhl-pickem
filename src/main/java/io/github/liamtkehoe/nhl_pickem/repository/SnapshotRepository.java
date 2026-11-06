@@ -38,7 +38,7 @@ public class SnapshotRepository {
         }
     }
 
-    /** All teams, East divisions first, each division in standings order. */
+    //All teams, East divisions first, each division in standings order
     public List<TeamStanding> teams(int seasonId) {
         return jdbc.sql("SELECT team, team_name, division, place, points, games_played, fetched_at FROM team_snapshot\n" +
                         "WHERE season_id = :s\n"
@@ -71,5 +71,18 @@ public class SnapshotRepository {
                     .param("at", Db.text(fetchedAt))
                     .update();
         }
+    }
+
+    public List<PlayerInfo> players(int seasonId) {
+        return jdbc.sql("SELECT player_id, name, team, position FROM player_snapshot\n" +
+                        "WHERE season_id = :s\n" +
+                        "ORDER BY name")
+                .param("s", seasonId)
+                .query((rs, row) -> new PlayerInfo(
+                        rs.getLong("player_id"),
+                        rs.getString("name"),
+                        rs.getString("team"),
+                        rs.getString("position")))
+                .list();
     }
 }

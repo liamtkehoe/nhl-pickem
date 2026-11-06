@@ -28,7 +28,7 @@ public class StandingsController {
         this.season = season;
     }
 
-    /** {"Atlantic": [8 teams], "Metropolitan": [...], "Central": [...], "Pacific": [...]} */
+    //{"Atlantic": [8 teams], "Metropolitan": [...], "Central": [...], "Pacific": [...]}
     @GetMapping("/standings")
     public Map<String, List<TeamStanding>> standings() {
         return snapshots.teams(season).stream()

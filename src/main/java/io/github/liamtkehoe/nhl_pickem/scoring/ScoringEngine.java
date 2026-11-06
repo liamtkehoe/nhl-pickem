@@ -10,7 +10,7 @@ public class ScoringEngine {
     public static final int CORRECT_OVER_UNDER = 1;
     public static final int CORRECT_AWARD = 3;
 
-    /** Ranking order: total, then exact places, then correct over/unders (all highest first). */
+    //Ranking order: total, then exact places, then correct over/unders (all highest first)
     private static final Comparator<PlayerScore> RANKING =
             Comparator.comparingInt(PlayerScore::total).reversed()
                     .thenComparing(Comparator.comparingInt(PlayerScore::exactPlaces).reversed())
