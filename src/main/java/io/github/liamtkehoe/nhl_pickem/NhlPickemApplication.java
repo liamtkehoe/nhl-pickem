@@ -9,6 +9,7 @@ import java.nio.file.Path;
 
 @SpringBootApplication
 public class NhlPickemApplication {
+	//Starts the backend
 	static void main(String[] args) throws IOException {
 		Files.createDirectories(Path.of("data"));
 		SpringApplication.run(NhlPickemApplication.class, args);

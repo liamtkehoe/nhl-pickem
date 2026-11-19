@@ -1,5 +1,55 @@
 export type OverUnder = 'OVER' | 'UNDER'
 export type Award = | 'HART' | 'CALDER' | 'VEZINA' | 'NORRIS' | 'ART_ROSS' | 'SELKE' | 'JACK_ADAMS' | 'ROCKET_RICHARD'
+export type OuStatus = 'PENDING' | 'LEADING' | 'TRAILING' | 'CLINCHED_WIN' | 'CLINCHED_LOSS' | 'PUSH'
+
+export interface StandingsResult {
+    team: string
+    predictedPlace: number
+    actualPlace: number | null
+    points: number
+}
+
+export interface OuResult {
+    team: string
+    pick: OverUnder
+    line: number | null
+    projectedPoints: number | null
+    status: OuStatus
+    points: number
+}
+
+export interface AwardResult {
+    award: Award
+    pickName: string
+    leaderName: string | null
+    isFinal: boolean
+    points: number
+}
+
+export interface PlayerScore {
+    username: string
+    total: number
+    standingsPoints: number
+    overUnderPoints: number
+    awardPoints: number
+    exactPlaces: number
+    correctOverUnders: number
+    standings: StandingsResult[]
+    overUnders: OuResult[]
+    awards: AwardResult[]
+}
+
+export interface LeaderboardEntry {
+    rank: number
+    username: string
+    total: number
+    standingsPoints: number
+    overUnderPoints: number
+    awardPoints: number
+    exactPlaces: number
+    correctOverUnders: number
+    submittedAt: string
+}
 
 export interface LoginResponse {
     id: number
@@ -94,6 +144,8 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
 export const api = {
     login: (username: string) => request<LoginResponse>('POST', '/api/login', { username }),
     pickOptions: () => request<PickOptions>('GET', '/api/pick-options'),
-    submitPicks: (picks: SubmitPicksRequest) =>
-        request<{ submittedAt: string }>('POST', '/api/picks', picks),
+    submitPicks: (picks: SubmitPicksRequest) => request<{ submittedAt: string }>('POST', '/api/picks', picks),
+    leaderboard: () => request<LeaderboardEntry[]>('GET', '/api/leaderboard'),
+    score: (username: string) => request<PlayerScore>('GET', `/api/scores/${encodeURIComponent(username)}`),
+    refresh: () => request<{ teams: number; players: number }>('POST', '/api/admin/refresh'),
 }

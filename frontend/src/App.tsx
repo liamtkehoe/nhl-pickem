@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { setCurrentUser, type LoginResponse } from './api'
 import { LoginScreen } from './LoginScreen'
 import { PicksWizard } from './picks/PicksWizard'
+import { Dashboard } from './dashboard/Dashboard'
 
 type Screen =
     | { name: 'login' }
@@ -46,9 +47,7 @@ export default function App() {
                   onSubmitted={() => setScreen({ name: 'dashboard', username: screen.username })}
               />
           )}
-          {screen.name === 'dashboard' && (
-              <p>Your picks are in. The dashboard arrives in Phase 6b.</p>
-          )}
+            {screen.name === 'dashboard' && <Dashboard username={screen.username} />}
         </main>
       </div>
   )
