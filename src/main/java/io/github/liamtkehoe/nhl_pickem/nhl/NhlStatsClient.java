@@ -17,6 +17,7 @@ public class NhlStatsClient {
     private static final ParameterizedTypeReference<StatsPage<SkaterSummary>> SKATERS = new ParameterizedTypeReference<>() {};
     private static final ParameterizedTypeReference<StatsPage<SkaterRealtime>> REALTIME = new ParameterizedTypeReference<>() {};
     private static final ParameterizedTypeReference<StatsPage<GoalieSummary>> GOALIES = new ParameterizedTypeReference<>() {};
+    private static final ParameterizedTypeReference<StatsPage<SkaterPenaltyKill>> PENALTY_KILL = new ParameterizedTypeReference<>() {};
 
     private final RestClient http;
 
@@ -34,6 +35,10 @@ public class NhlStatsClient {
 
     public List<GoalieSummary> goalies(int seasonId) {
         return fetchAll("/goalie/summary", regularSeason(seasonId), GOALIES);
+    }
+
+    public List<SkaterPenaltyKill> penaltyKill(int seasonId) {
+        return fetchAll("/skater/penaltykill", regularSeason(seasonId), PENALTY_KILL);
     }
 
     public Set<Long> rookieIds(int seasonId) {

@@ -142,6 +142,15 @@ public class NhlSyncService {
         Map<Long, SkaterRealtime> realtime = stats.skaterRealtime(season).stream()
                 .collect(Collectors.toMap(SkaterRealtime::playerId, Function.identity(), (a, b) -> a));
 
+        Map<Long, SkaterPenaltyKill> penaltyKill;
+        try {
+            penaltyKill = stats.penaltyKill(season).stream()
+                    .collect(Collectors.toMap(SkaterPenaltyKill::playerId, Function.identity(), (a, b) -> a));
+        } catch (RuntimeException e) {
+            log.warn("Penalty-kill lookup failed. No Selke candidates this sync: {}", e.getMessage());
+            penaltyKill = Map.of();
+        }
+
         Set<Long> rookies;
         try {
             rookies = stats.rookieIds(season);
@@ -153,6 +162,7 @@ public class NhlSyncService {
         Map<Long, PlayerStats> rows = new LinkedHashMap<>();
         for (SkaterSummary s : stats.skaters(season)) {
             SkaterRealtime rt = realtime.get(s.playerId());
+            SkaterPenaltyKill pk = penaltyKill.get(s.playerId());
             rows.putIfAbsent(s.playerId(), new PlayerStats(
                     s.playerId(),
                     s.skaterFullName(),
@@ -160,9 +170,12 @@ public class NhlSyncService {
                     s.positionCode(),
                     rookies.contains(s.playerId()),
                     s.gamesPlayed(), s.goals(), s.assists(), s.points(), s.plusMinus(),
-                    rt == null || rt.giveaways() == null ? 0 : rt.giveaways(),
-                    rt == null || rt.takeaways() == null ? 0 : rt.takeaways(),
-                    0, null, null));
+                    rt == null ? 0 : orZero(rt.giveaways()),
+                    rt == null ? 0 : orZero(rt.takeaways()),
+                    rt == null ? 0 : orZero(rt.blockedShots()),
+                    pk == null || pk.shTimeOnIcePerGame() == null ? 0 : pk.shTimeOnIcePerGame(),
+                    pk == null ? 0 : orZero(pk.shGoalsAgainst()),
+                    0, 0, null, null));
         }
         for (GoalieSummary g : stats.goalies(season)) {
             rows.putIfAbsent(g.playerId(), new PlayerStats(
@@ -171,14 +184,19 @@ public class NhlSyncService {
                     currentTeam(g.playerId(), g.teamAbbrevs(), rosterTeams),
                     "G",
                     rookies.contains(g.playerId()),
-                    g.gamesPlayed(), 0, 0, 0, 0, 0, 0,
-                    g.wins(), g.savePct(), g.goalsAgainstAverage()));
+                    g.gamesPlayed(), 0, 0, 0, 0,
+                    0, 0, 0, 0, 0,
+                    g.wins(), orZero(g.shutouts()), g.savePct(), g.goalsAgainstAverage()));
         }
 
         statsRepository.replaceAll(season, List.copyOf(rows.values()), now);
-        log.info("Stats synced: {} players ({} rookies)", rows.size(), rookies.size());
+        log.info("Stats synced: {} players ({} rookies, {} with PK time)", rows.size(), rookies.size(), penaltyKill.size());
 
         return rows.size();
+    }
+
+    private static int orZero(Integer value) {
+        return value == null ? 0 : value;
     }
 
     private static String currentTeam(long playerId, String teamAbbrevs, Map<Long, String> rosterTeams) {

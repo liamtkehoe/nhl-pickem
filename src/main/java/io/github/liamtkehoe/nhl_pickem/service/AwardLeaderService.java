@@ -69,4 +69,12 @@ public class AwardLeaderService {
             results.saveFinal(seasonId, award, request.playerId(), null, "MANUAL", clock.instant());
         }
     }
+
+    public List<AwardFormulas.Candidate> candidates(int seasonId, Award award, int limit) {
+        return formulas.rankings(stats.find(seasonId), snapshots.teams(seasonId), lines.find(seasonId), gamesInSeason)
+                .getOrDefault(award, List.of())
+                .stream()
+                .limit(limit)
+                .toList();
+    }
 }

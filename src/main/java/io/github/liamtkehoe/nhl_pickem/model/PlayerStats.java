@@ -13,7 +13,11 @@ public record PlayerStats(
         int plusMinus,
         int giveaways,
         int takeaways,
+        int blockedShots,
+        double pkSecondsPerGame,
+        int pkGoalsAgainst,
         int wins,
+        int shutouts,
         Double savePct,
         Double gaa) {
 

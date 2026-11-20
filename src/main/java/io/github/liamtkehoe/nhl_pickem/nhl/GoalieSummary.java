@@ -9,6 +9,7 @@ public record GoalieSummary(
         String teamAbbrevs,
         int gamesPlayed,
         int wins,
+        Integer shutouts,
         Double savePct,
         Double goalsAgainstAverage) {
 }
