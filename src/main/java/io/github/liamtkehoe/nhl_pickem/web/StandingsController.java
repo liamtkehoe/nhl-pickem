@@ -36,10 +36,10 @@ public class StandingsController {
                         TeamStanding::division, LinkedHashMap::new, Collectors.toList()));
     }
 
-    public record RefreshResult(int teams, int players) {}
+    public record RefreshResult(int teams, int players, int stats) {}
 
     @PostMapping("/admin/refresh")
     public RefreshResult refresh() {
-        return new RefreshResult(sync.syncStandings(), sync.syncRosters());
+        return new RefreshResult(sync.syncStandings(), sync.syncRosters(), sync.syncStats());
     }
 }
