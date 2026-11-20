@@ -1,16 +1,15 @@
 package io.github.liamtkehoe.nhl_pickem.web;
 
 import io.github.liamtkehoe.nhl_pickem.model.Award;
+import io.github.liamtkehoe.nhl_pickem.scoring.AwardFormulas;
 import io.github.liamtkehoe.nhl_pickem.scoring.AwardLeader;
 import io.github.liamtkehoe.nhl_pickem.service.AwardLeaderService;
 import io.github.liamtkehoe.nhl_pickem.service.OULinesImport;
 import io.github.liamtkehoe.nhl_pickem.service.OULinesService;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -36,6 +35,12 @@ public class AdminController {
     @PutMapping("/award-winners")
     public Map<Award, AwardLeader> recordWinner(@RequestBody AwardLeaderService.WinnerRequest request) {
         awardLeaders.recordWinner(season, request);
+
         return awardLeaders.currentLeaders(season);
+    }
+
+    @GetMapping("/award-candidates/{award}")
+    public List<AwardFormulas.Candidate> candidates(@PathVariable Award award, @RequestParam(defaultValue = "10") int limit) {
+        return awardLeaders.candidates(season, award, limit);
     }
 }

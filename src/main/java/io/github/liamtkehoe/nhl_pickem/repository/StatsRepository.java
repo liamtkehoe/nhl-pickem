@@ -17,12 +17,15 @@ public class StatsRepository {
 
     @Transactional
     public void replaceAll(int seasonId, List<PlayerStats> rows, Instant fetchedAt) {
-        jdbc.sql("DELETE FROM player_stats WHERE season_id = :s").param("s", seasonId).update();
+        jdbc.sql("DELETE FROM player_stats\n" +
+                "WHERE season_id = :s").param("s", seasonId).update();
         for (PlayerStats p : rows) {
             jdbc.sql("INSERT INTO player_stats (season_id, player_id, name, team, position, is_rookie, "
                             + "games_played, goals, assists, points, plus_minus, giveaways, takeaways, "
-                            + "wins, save_pct, gaa, fetched_at) VALUES (:s, :id, :name, :team, :position, "
-                            + ":rookie, :gp, :goals, :assists, :points, :pm, :give, :take, :wins, :sv, :gaa, :at)")
+                            + "blocked_shots, pk_seconds_per_game, pk_goals_against, wins, shutouts, "
+                            + "save_pct, gaa, fetched_at) VALUES (:s, :id, :name, :team, :position, :rookie, "
+                            + ":gp, :goals, :assists, :points, :pm, :give, :take, :blocks, :pkSeconds, "
+                            + ":pkGoalsAgainst, :wins, :shutouts, :sv, :gaa, :at)")
                     .param("s", seasonId)
                     .param("id", p.playerId())
                     .param("name", p.name())
@@ -36,7 +39,11 @@ public class StatsRepository {
                     .param("pm", p.plusMinus())
                     .param("give", p.giveaways())
                     .param("take", p.takeaways())
+                    .param("blocks", p.blockedShots())
+                    .param("pkSeconds", p.pkSecondsPerGame())
+                    .param("pkGoalsAgainst", p.pkGoalsAgainst())
                     .param("wins", p.wins())
+                    .param("shutouts", p.shutouts())
                     .param("sv", p.savePct())
                     .param("gaa", p.gaa())
                     .param("at", Db.text(fetchedAt))
@@ -45,7 +52,8 @@ public class StatsRepository {
     }
 
     public List<PlayerStats> find(int seasonId) {
-        return jdbc.sql("SELECT * FROM player_stats WHERE season_id = :s")
+        return jdbc.sql("SELECT * FROM player_stats\n" +
+                        "WHERE season_id = :s")
                 .param("s", seasonId)
                 .query((rs, row) -> {
                     double sv = rs.getDouble("save_pct");
@@ -65,7 +73,11 @@ public class StatsRepository {
                             rs.getInt("plus_minus"),
                             rs.getInt("giveaways"),
                             rs.getInt("takeaways"),
+                            rs.getInt("blocked_shots"),
+                            rs.getDouble("pk_seconds_per_game"),
+                            rs.getInt("pk_goals_against"),
                             rs.getInt("wins"),
+                            rs.getInt("shutouts"),
                             savePct,
                             gaa);
                 })
