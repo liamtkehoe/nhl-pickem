@@ -1,16 +1,19 @@
 package io.github.liamtkehoe.nhl_pickem.service;
 
 import io.github.liamtkehoe.nhl_pickem.model.PlayerInfo;
+import io.github.liamtkehoe.nhl_pickem.model.PlayerStats;
 import io.github.liamtkehoe.nhl_pickem.model.TeamStanding;
-import io.github.liamtkehoe.nhl_pickem.nhl.NhlApiClient;
-import io.github.liamtkehoe.nhl_pickem.nhl.NhlRosterPlayer;
+import io.github.liamtkehoe.nhl_pickem.nhl.*;
 import io.github.liamtkehoe.nhl_pickem.repository.SnapshotRepository;
 import java.time.Clock;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.function.IntSupplier;
+import java.util.stream.Collectors;
+
+import io.github.liamtkehoe.nhl_pickem.repository.StatsRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,17 +28,23 @@ public class NhlSyncService {
 
     private final NhlApiClient nhl;
     private final SnapshotRepository snapshots;
+    private final StatsRepository statsRepository;
+    private final NhlStatsClient stats;
     private final Clock clock;
     private final int season;
     private final boolean enabled;
 
     public NhlSyncService(NhlApiClient nhl,
                           SnapshotRepository snapshots,
+                          StatsRepository statsRepository,
+                          NhlStatsClient stats,
                           Clock clock,
                           @Value("${pickem.current-season}") int season,
                           @Value("${pickem.sync.enabled:true}") boolean enabled) {
         this.nhl = nhl;
         this.snapshots = snapshots;
+        this.statsRepository = statsRepository;
+        this.stats = stats;
         this.clock = clock;
         this.season = season;
         this.enabled = enabled;
@@ -50,6 +59,7 @@ public class NhlSyncService {
         }
         safely("Standings", this::syncStandings);
         safely("Rosters", this::syncRosters);
+        safely("Stats", this::syncStats);
     }
 
     @Scheduled(initialDelay = 10, fixedDelay = 10, timeUnit = TimeUnit.MINUTES)
@@ -116,5 +126,71 @@ public class NhlSyncService {
         } catch (RuntimeException e) {
             log.warn("{} sync failed, keeping the last snapshot: {}", what, e.getMessage());
         }
+    }
+
+    @Scheduled(initialDelay = 30, fixedDelay = 30, timeUnit = TimeUnit.MINUTES)
+    public void scheduledStats() {
+        safely("Stats", this::syncStats);
+    }
+
+    public int syncStats() {
+        Instant now = clock.instant();
+
+        Map<Long, String> rosterTeams = snapshots.players(season).stream()
+                .collect(Collectors.toMap(PlayerInfo::playerId, PlayerInfo::team, (a, b) -> a));
+
+        Map<Long, SkaterRealtime> realtime = stats.skaterRealtime(season).stream()
+                .collect(Collectors.toMap(SkaterRealtime::playerId, Function.identity(), (a, b) -> a));
+
+        Set<Long> rookies;
+        try {
+            rookies = stats.rookieIds(season);
+        } catch (RuntimeException e) {
+            log.warn("Rookie lookup failed. No Calder leader this sync: {}", e.getMessage());
+            rookies = Set.of();
+        }
+
+        Map<Long, PlayerStats> rows = new LinkedHashMap<>();
+        for (SkaterSummary s : stats.skaters(season)) {
+            SkaterRealtime rt = realtime.get(s.playerId());
+            rows.putIfAbsent(s.playerId(), new PlayerStats(
+                    s.playerId(),
+                    s.skaterFullName(),
+                    currentTeam(s.playerId(), s.teamAbbrevs(), rosterTeams),
+                    s.positionCode(),
+                    rookies.contains(s.playerId()),
+                    s.gamesPlayed(), s.goals(), s.assists(), s.points(), s.plusMinus(),
+                    rt == null || rt.giveaways() == null ? 0 : rt.giveaways(),
+                    rt == null || rt.takeaways() == null ? 0 : rt.takeaways(),
+                    0, null, null));
+        }
+        for (GoalieSummary g : stats.goalies(season)) {
+            rows.putIfAbsent(g.playerId(), new PlayerStats(
+                    g.playerId(),
+                    g.goalieFullName(),
+                    currentTeam(g.playerId(), g.teamAbbrevs(), rosterTeams),
+                    "G",
+                    rookies.contains(g.playerId()),
+                    g.gamesPlayed(), 0, 0, 0, 0, 0, 0,
+                    g.wins(), g.savePct(), g.goalsAgainstAverage()));
+        }
+
+        statsRepository.replaceAll(season, List.copyOf(rows.values()), now);
+        log.info("Stats synced: {} players ({} rookies)", rows.size(), rookies.size());
+
+        return rows.size();
+    }
+
+    private static String currentTeam(long playerId, String teamAbbrevs, Map<Long, String> rosterTeams) {
+        String rosterTeam = rosterTeams.get(playerId);
+        if (rosterTeam != null) {
+            return rosterTeam;
+        }
+        if (teamAbbrevs == null || teamAbbrevs.isBlank()) {
+            return "";
+        }
+        String[] teams = teamAbbrevs.split(",");
+
+        return teams[teams.length - 1].trim();
     }
 }

@@ -88,3 +88,24 @@ CREATE TABLE IF NOT EXISTS award_results (
     updated_at  TEXT NOT NULL,
     PRIMARY KEY (season_id, award)
     );
+
+CREATE TABLE IF NOT EXISTS player_stats (
+    season_id     INTEGER NOT NULL REFERENCES seasons(id),
+    player_id     INTEGER NOT NULL,
+    name          TEXT NOT NULL,
+    team          TEXT NOT NULL,
+    position      TEXT NOT NULL,              -- C, L, R, D or G
+    is_rookie     INTEGER NOT NULL DEFAULT 0,
+    games_played  INTEGER NOT NULL,
+    goals         INTEGER NOT NULL DEFAULT 0,
+    assists       INTEGER NOT NULL DEFAULT 0,
+    points        INTEGER NOT NULL DEFAULT 0,
+    plus_minus    INTEGER NOT NULL DEFAULT 0,
+    giveaways     INTEGER NOT NULL DEFAULT 0,
+    takeaways     INTEGER NOT NULL DEFAULT 0,
+    wins          INTEGER NOT NULL DEFAULT 0,  -- goalies only
+    save_pct      REAL,                        -- goalies only
+    gaa           REAL,                        -- goalies only
+    fetched_at    TEXT NOT NULL,
+    PRIMARY KEY (season_id, player_id)
+    );
