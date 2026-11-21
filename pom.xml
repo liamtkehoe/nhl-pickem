@@ -78,5 +78,41 @@
 			</plugin>
 		</plugins>
 	</build>
-
+	<profiles>
+		<!-- ./mvnw -Pfrontend package : builds the React app into the jar -->
+		<profile>
+			<id>frontend</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>exec-maven-plugin</artifactId>
+						<version>3.6.1</version>
+						<executions>
+							<execution>
+								<id>npm-ci</id>
+								<phase>generate-resources</phase>
+								<goals><goal>exec</goal></goals>
+								<configuration>
+									<executable>npm</executable>
+									<workingDirectory>frontend</workingDirectory>
+									<arguments><argument>ci</argument></arguments>
+								</configuration>
+							</execution>
+							<execution>
+								<id>npm-build</id>
+								<phase>generate-resources</phase>
+								<goals><goal>exec</goal></goals>
+								<configuration>
+									<executable>npm</executable>
+									<workingDirectory>frontend</workingDirectory>
+									<arguments><argument>run</argument><argument>build</argument></arguments>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>

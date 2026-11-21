@@ -32,7 +32,8 @@ build/
 ### VS Code ###
 .vscode/
 
-data/
+/data/
+/data/backups/
 *.db
 node_modules/
 frontend/dist/
