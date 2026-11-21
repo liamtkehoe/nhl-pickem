@@ -33,6 +33,7 @@ build/
 .vscode/
 
 data/
+data/backups/
 *.db
 node_modules/
 frontend/dist/
