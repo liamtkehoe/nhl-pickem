@@ -1,9 +1,6 @@
 package io.github.liamtkehoe.nhl_pickem.web;
 
-import io.github.liamtkehoe.nhl_pickem.service.ForbiddenException;
-import io.github.liamtkehoe.nhl_pickem.service.InvalidRequestException;
-import io.github.liamtkehoe.nhl_pickem.service.NotFoundException;
-import io.github.liamtkehoe.nhl_pickem.service.PickException;
+import io.github.liamtkehoe.nhl_pickem.service.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -32,5 +29,10 @@ public class ApiExceptionHandler {
     @ExceptionHandler(ForbiddenException.class)
     public ProblemDetail forbidden(ForbiddenException e) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, e.getMessage());
+    }
+
+    @ExceptionHandler(ConflictException.class)
+    public ProblemDetail conflict(ConflictException e) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, e.getMessage());
     }
 }

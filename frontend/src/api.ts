@@ -158,4 +158,5 @@ export const api = {
     score: (username: string) => request<PlayerScore>('GET', `/api/scores/${encodeURIComponent(username)}`),
     refresh: () => request<{ teams: number; players: number }>('POST', '/api/admin/refresh'),
     season: () => request<SeasonInfo>('GET', '/api/season'),
+    signUp: (username: string) => request<LoginResponse>('POST', '/api/signup', { username }),
 }

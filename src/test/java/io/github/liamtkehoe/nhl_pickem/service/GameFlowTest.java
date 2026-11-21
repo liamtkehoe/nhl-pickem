@@ -38,8 +38,8 @@ class GameFlowTest {
                 .collect(Collectors.toMap(TeamStanding::team, t -> 90.5));
         linesService.importLines(new OULinesImport(SEASON, "test", "2026-07-20", lines));
 
-        User perfect = userService.login("perfect").user();
-        User backwards = userService.login("backwards").user();
+        User perfect = userService.signUp("perfect");
+        User backwards = userService.signUp("backwards");
         pickService.submit(perfect.id(), SEASON, TestData.perfectRequest());
         pickService.submit(backwards.id(), SEASON, TestData.backwardsRequest());
 

@@ -2,6 +2,7 @@ package io.github.liamtkehoe.nhl_pickem.service;
 
 import io.github.liamtkehoe.nhl_pickem.model.User;
 import io.github.liamtkehoe.nhl_pickem.repository.UserRepository;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.time.Clock;
@@ -20,17 +21,39 @@ public class UserService {
         this.clock = clock;
     }
 
-    public record LoginResult(User user, boolean created) {}
-
-    //Finds the account or creates it the first time a username is used
-    public LoginResult login(String rawUsername) {
-        String username = rawUsername == null ? "" : rawUsername.trim();
+    //Creates a new account. Refuses a username that's taken in any capitalization
+    public User signUp(String rawUsername) {
+        String username = clean(rawUsername);
         if (!VALID_USERNAME.matcher(username).matches()) {
             throw new InvalidRequestException(List.of("Usernames must be 3-20 letters, numbers, - or _"));
         }
+        if (users.findByUsername(username).isPresent()) {
+            throw new ConflictException(taken(username));
+        }
+        try {
+            return users.create(username, clock.instant());
+        } catch (DataAccessException e) {
+            throw new ConflictException(taken(username));
+        }
+    }
+
+    //Logs in to an existing account. Never creates a new one
+    public User logIn(String rawUsername) {
+        String username = clean(rawUsername);
+        if (username.isEmpty()) {
+            throw new InvalidRequestException(List.of("Enter your username"));
+        }
         return users.findByUsername(username)
-                .map(user -> new LoginResult(user, false))
-                .orElseGet(() -> new LoginResult(users.create(username, clock.instant()), true));
+                .orElseThrow(() -> new NotFoundException(
+                        "No account named \"" + username + "\". Please check the spelling, or sign up instead."));
+    }
+
+    private static String clean(String raw) {
+        return raw == null ? "" : raw.trim();
+    }
+
+    private static String taken(String username) {
+        return "The username \"" + username + "\" is already taken. If it is yours, please log in instead.";
     }
 
     public User require(String username) {
