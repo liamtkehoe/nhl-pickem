@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { setCurrentUser, type LoginResponse } from './api'
+import { useEffect, useState } from 'react'
+import { api, setCurrentUser, type LoginResponse, type SeasonInfo } from './api'
 import { LoginScreen } from './LoginScreen'
 import { PicksWizard } from './picks/PicksWizard'
 import { Dashboard } from './dashboard/Dashboard'
@@ -10,45 +10,58 @@ type Screen =
     | { name: 'dashboard'; username: string }
 
 export default function App() {
-  const [screen, setScreen] = useState<Screen>({ name: 'login' })
+    const [screen, setScreen] = useState<Screen>({ name: 'login' })
+    const [season, setSeason] = useState<SeasonInfo | null>(null)
 
-  function enter(user: LoginResponse) {
-    setCurrentUser(user.username)
-    setScreen(
-        user.submittedAt
-            ? { name: 'dashboard', username: user.username }
-            : { name: 'picks', username: user.username },
-    )
-  }
+    useEffect(() => {
+        api.season().then(setSeason).catch(() => setSeason(null))
+    }, [])
 
-  function switchPlayer() {
-    setCurrentUser(null)
-    setScreen({ name: 'login' })
-  }
+    function enter(user: LoginResponse) {
+        setCurrentUser(user.username)
+        setScreen(
+            user.submittedAt
+                ? { name: 'dashboard', username: user.username }
+                : { name: 'picks', username: user.username },
+        )
+    }
 
-  return (
-      <div className="app">
-        {screen.name !== 'login' && (
-            <header className="topbar">
-              <strong>NHL Pick'em</strong>
-              <span>
+    function switchPlayer() {
+        setCurrentUser(null)
+        setScreen({ name: 'login' })
+    }
+
+    return (
+        <div className="app">
+            {screen.name !== 'login' && (
+                <header className="topbar">
+                    <div className="brand">
+                        <strong>NHL Pick'em</strong>
+                        {season && (
+                            <span className="season-badge">
+                {season.label}
+                                {season.practice ? ' · Practice' : ''}
+              </span>
+                        )}
+                    </div>
+                    <span>
             {screen.username} ·{' '}
-                <button type="button" className="link" onClick={switchPlayer}>
+                        <button type="button" className="link" onClick={switchPlayer}>
               Switch player
             </button>
           </span>
-            </header>
-        )}
-        <main>
-          {screen.name === 'login' && <LoginScreen onLogin={enter} />}
-          {screen.name === 'picks' && (
-              <PicksWizard
-                  username={screen.username}
-                  onSubmitted={() => setScreen({ name: 'dashboard', username: screen.username })}
-              />
-          )}
-            {screen.name === 'dashboard' && <Dashboard username={screen.username} />}
-        </main>
-      </div>
-  )
+                </header>
+            )}
+            <main>
+                {screen.name === 'login' && <LoginScreen season={season} onLogin={enter} />}
+                {screen.name === 'picks' && (
+                    <PicksWizard
+                        username={screen.username}
+                        onSubmitted={() => setScreen({ name: 'dashboard', username: screen.username })}
+                    />
+                )}
+                {screen.name === 'dashboard' && <Dashboard username={screen.username} />}
+            </main>
+        </div>
+    )
 }

@@ -79,3 +79,13 @@ input, select { font: inherit; width: 100%; padding: 6px 8px; border: 1px solid 
   .summary { grid-template-columns: 1fr; }
   .refresh { justify-items: start; }
 }
+
+.brand { display: flex; align-items: center; gap: 8px; }
+.season-badge {
+  padding: 2px 10px; border-radius: 999px;
+  font-size: 0.8em; font-weight: 600;
+  color: var(--accent); background: #eef4fb; border: 1px solid #cfe0f3;
+}
+.login .subtitle { margin: -6px 0 8px; color: #5b6475; }
+.award-description { margin: 0; }
+.has-tip { cursor: help; text-decoration: underline dotted #8a93a3; text-underline-offset: 3px; }

@@ -75,8 +75,17 @@ export interface DivisionOption {
 export interface AwardOption {
     award: Award
     displayName: string
+    description: string
     teamPick: boolean
     positions: string[]
+}
+
+export interface SeasonInfo {
+    id: number
+    label: string
+    practice: boolean
+    open: boolean
+    picksCloseAt: string | null
 }
 
 export interface PlayerInfo {
@@ -148,4 +157,5 @@ export const api = {
     leaderboard: () => request<LeaderboardEntry[]>('GET', '/api/leaderboard'),
     score: (username: string) => request<PlayerScore>('GET', `/api/scores/${encodeURIComponent(username)}`),
     refresh: () => request<{ teams: number; players: number }>('POST', '/api/admin/refresh'),
+    season: () => request<SeasonInfo>('GET', '/api/season'),
 }
