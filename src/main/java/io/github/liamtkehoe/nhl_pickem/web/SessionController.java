@@ -3,13 +3,12 @@ package io.github.liamtkehoe.nhl_pickem.web;
 import io.github.liamtkehoe.nhl_pickem.model.User;
 import io.github.liamtkehoe.nhl_pickem.repository.PickRepository;
 import io.github.liamtkehoe.nhl_pickem.service.UserService;
+import java.time.Instant;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.time.Instant;
 
 @RestController
 @RequestMapping("/api")
@@ -28,11 +27,17 @@ public class SessionController {
 
     public record LoginResponse(long id, String username, boolean created, Instant submittedAt) {}
 
-    @PostMapping("/login")
-    public LoginResponse login(@RequestBody LoginRequest request) {
-        UserService.LoginResult result = users.login(request.username());
-        User user = result.user();
+    @PostMapping("/signup")
+    public LoginResponse signUp(@RequestBody LoginRequest request) {
+        return response(users.signUp(request.username()), true);
+    }
 
-        return new LoginResponse(user.id(), user.username(), result.created(), picks.submittedAt(user.id(), season).orElse(null));
+    @PostMapping("/login")
+    public LoginResponse logIn(@RequestBody LoginRequest request) {
+        return response(users.logIn(request.username()), false);
+    }
+
+    private LoginResponse response(User user, boolean created) {
+        return new LoginResponse(user.id(), user.username(), created, picks.submittedAt(user.id(), season).orElse(null));
     }
 }

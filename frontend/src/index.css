@@ -89,3 +89,6 @@ input, select { font: inherit; width: 100%; padding: 6px 8px; border: 1px solid 
 .login .subtitle { margin: -6px 0 8px; color: #5b6475; }
 .award-description { margin: 0; }
 .has-tip { cursor: help; text-decoration: underline dotted #8a93a3; text-underline-offset: 3px; }
+
+.choose, .login-form { display: grid; gap: 10px; }
+.login h2 { margin: 8px 0 0; font-size: 1.1rem; }
