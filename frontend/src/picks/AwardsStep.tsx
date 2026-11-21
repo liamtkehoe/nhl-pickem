@@ -67,6 +67,7 @@ function PlayerPicker({ option, players, value, onChange }: PlayerPickerProps) {
     return (
         <div className="award">
             <label htmlFor={`award-${option.award}`}>{option.displayName}</label>
+            <p className="hint award-description">{option.description}</p>
             <input
                 placeholder="Search by name or team code like TOR"
                 value={query}
@@ -101,6 +102,7 @@ function TeamPicker({ option, teams, value, onChange }: TeamPickerProps) {
     return (
         <div className="award">
             <label htmlFor={`award-${option.award}`}>{option.displayName}</label>
+            <p className="hint award-description">{option.description}</p>
             <select id={`award-${option.award}`} value={value ?? ''} onChange={e => onChange(e.target.value)}>
                 <option value="" disabled>
                     Choose a team

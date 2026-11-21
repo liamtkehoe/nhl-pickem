@@ -8,7 +8,7 @@ interface Props {
 }
 
 export function ScoreBreakdown({ score, teams, awards }: Props) {
-    const awardNames = new Map(awards.map(a => [a.award, a.displayName]))
+    const awardInfo = new Map(awards.map(a => [a.award, a]))
     const teamName = (code: string) => teams.get(code)?.teamName ?? code
     const divisions = [...new Set([...teams.values()].map(t => t.division))]
 
@@ -99,7 +99,11 @@ export function ScoreBreakdown({ score, teams, awards }: Props) {
                         <tbody>
                         {score.awards.map(r => (
                             <tr key={r.award}>
-                                <td>{awardNames.get(r.award) ?? r.award}</td>
+                                <td>
+                                    <span className="has-tip" title={awardInfo.get(r.award)?.description}>
+                                        {awardInfo.get(r.award)?.displayName ?? r.award}
+                                    </span>
+                                </td>
                                 <td>{r.pickName}</td>
                                 <td>
                                     {r.leaderName ?? <span className="muted">Pending</span>}
