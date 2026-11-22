@@ -64,6 +64,7 @@ function PlayerPicker({ option, players, season, value, onChange }: PlayerPicker
     const matches = players.filter(
         p =>
             option.positions.includes(p.position) &&
+            (!option.rookiesOnly || p.rookie) &&
             (p.playerId === value || p.name.toLowerCase().includes(q) || p.team.toLowerCase() === q),
     )
     const selected = players.find(p => p.playerId === value)
@@ -74,6 +75,9 @@ function PlayerPicker({ option, players, season, value, onChange }: PlayerPicker
             <div className="award">
                 <label htmlFor={`award-${option.award}`}>{option.displayName}</label>
                 <p className="hint award-description">{option.description}</p>
+                {option.rookiesOnly && (
+                    <p className="hint award-description">Only rookies who have played this season are listed.</p>
+                )}
                 <input
                     placeholder="Search by name or a team code like TOR"
                     value={query}

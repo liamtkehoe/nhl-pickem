@@ -19,7 +19,9 @@ public class PickValidator {
         List<String> problems = new ArrayList<>();
         List<StandingsPick> standings = validateStandings(request.standings(), byTeam, problems);
         List<OuPick> overUnders = validateOverUnders(request.overUnders(), byTeam, problems);
-        List<AwardPick> awards = validateAwards(request.awards(), byTeam, players, problems);
+
+        boolean rookiesKnown = players.values().stream().anyMatch(PlayerInfo::rookie);
+        List<AwardPick> awards = validateAwards(request.awards(), byTeam, players, rookiesKnown, problems);
 
         if (!problems.isEmpty()) {
             throw new InvalidRequestException(problems);
@@ -77,7 +79,7 @@ public class PickValidator {
         return picks;
     }
 
-    private List<AwardPick> validateAwards(List<SubmitPicksRequest.AwardEntry> entries, Map<String, TeamStanding> byTeam, Map<Long, PlayerInfo> players, List<String> problems) {
+    private List<AwardPick> validateAwards(List<SubmitPicksRequest.AwardEntry> entries, Map<String, TeamStanding> byTeam, Map<Long, PlayerInfo> players, boolean rookiesKnown, List<String> problems) {
         List<AwardPick> picks = new ArrayList<>();
         Set<Award> seen = EnumSet.noneOf(Award.class);
 
@@ -100,6 +102,8 @@ public class PickValidator {
                     problems.add(award.displayName() + ": unknown player " + entry.playerId());
                 } else if (!award.allowsPosition(player.position())) {
                     problems.add(award.displayName() + ": " + player.name() + " (" + player.position() + ") isn't eligible");
+                } else if (award == Award.CALDER && rookiesKnown && !player.rookie()) {
+                    problems.add(award.displayName() + ": " + player.name() + " isn't a rookie");
                 } else {
                     picks.add(AwardPick.player(award, player.playerId(), player.name()));
                 }

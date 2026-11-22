@@ -104,7 +104,7 @@ public class NhlSyncService {
         for (TeamStanding team : teams) {
             try {
                 for (NhlRosterPlayer p : nhl.currentRoster(team.team())) {
-                    players.add(new PlayerInfo(p.id(), p.fullName(), team.team(), p.positionCode()));
+                    players.add(new PlayerInfo(p.id(), p.fullName(), team.team(), p.positionCode(), false));
                 }
                 Thread.sleep(250); // be polite: about 4 requests a second
             } catch (InterruptedException e) {

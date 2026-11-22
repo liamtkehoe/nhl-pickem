@@ -41,8 +41,8 @@ public class SnapshotRepository {
     //All teams, East divisions first, each division in standings order
     public List<TeamStanding> teams(int seasonId) {
         return jdbc.sql("SELECT team, team_name, division, place, points, games_played, fetched_at FROM team_snapshot\n" +
-                        "WHERE season_id = :s\n"
-                        + "ORDER BY CASE division WHEN 'Atlantic' THEN 1 WHEN 'Metropolitan' THEN 2 WHEN 'Central' THEN 3 ELSE 4 END, place")
+                        "WHERE season_id = :s\n" +
+                        "ORDER BY CASE division WHEN 'Atlantic' THEN 1 WHEN 'Metropolitan' THEN 2 WHEN 'Central' THEN 3 ELSE 4 END, place")
                 .param("s", seasonId)
                 .query((rs, row) -> new TeamStanding(
                         rs.getString("team"),
@@ -74,15 +74,17 @@ public class SnapshotRepository {
     }
 
     public List<PlayerInfo> players(int seasonId) {
-        return jdbc.sql("SELECT player_id, name, team, position FROM player_snapshot\n" +
-                        "WHERE season_id = :s\n" +
-                        "ORDER BY name")
+        return jdbc.sql("SELECT p.player_id, p.name, p.team, p.position, COALESCE(s.is_rookie, 0) AS is_rookie FROM player_snapshot p\n" +
+                        "LEFT JOIN player_stats s ON s.season_id = p.season_id AND s.player_id = p.player_id\n" +
+                        "WHERE p.season_id = :s\n" +
+                        "ORDER BY p.name")
                 .param("s", seasonId)
                 .query((rs, row) -> new PlayerInfo(
                         rs.getLong("player_id"),
                         rs.getString("name"),
                         rs.getString("team"),
-                        rs.getString("position")))
+                        rs.getString("position"),
+                        rs.getInt("is_rookie") == 1))
                 .list();
     }
 }
