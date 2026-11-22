@@ -3,6 +3,7 @@ import { api, setCurrentUser, type LoginResponse, type SeasonInfo } from './api'
 import { LoginScreen } from './LoginScreen'
 import { PicksWizard } from './picks/PicksWizard'
 import { Dashboard } from './dashboard/Dashboard'
+import { ThemeToggle } from './ThemeToggle'
 
 type Screen =
     | { name: 'login' }
@@ -33,6 +34,7 @@ export default function App() {
 
     return (
         <div className="app">
+            <ThemeToggle />
             {screen.name !== 'login' && (
                 <header className="topbar">
                     <div className="brand">
