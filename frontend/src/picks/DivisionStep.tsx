@@ -4,6 +4,7 @@ import { CSS } from '@dnd-kit/utilities'
 import type { Dispatch, SetStateAction } from 'react'
 import type { DivisionOption, OverUnder, TeamOption } from '../api'
 import type { Draft } from './useDraft'
+import { TeamLogo } from '../images'
 
 interface Props {
     division: DivisionOption
@@ -82,6 +83,7 @@ function TeamRow({ place, team, pick, onPick }: RowProps) {
         ⠿
       </span>
             <span className="place">{place}</span>
+            <TeamLogo team={team.team} />
             <span className="name">{team.teamName}</span>
             <span className="line">{team.line ?? '–'}</span>
             <span className="ou">
