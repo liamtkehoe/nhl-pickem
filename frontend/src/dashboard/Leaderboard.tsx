@@ -1,13 +1,15 @@
 import type { LeaderboardEntry } from '../api'
+import { PlaceTrophy } from './PlaceTrophy'
 import { formatDate } from './shared'
 
 interface Props {
     entries: LeaderboardEntry[]
     me: string
+    showTrophies?: boolean
     onSelect: (username: string) => void
 }
 
-export function Leaderboard({ entries, me, onSelect }: Props) {
+export function Leaderboard({ entries, me, showTrophies = false, onSelect }: Props) {
     if (entries.length === 0) return <p>No one has submitted picks yet.</p>
 
     return (
@@ -33,6 +35,7 @@ export function Leaderboard({ entries, me, onSelect }: Props) {
                                 <button type="button" className="link" onClick={() => onSelect(e.username)}>
                                     {e.username}
                                 </button>
+                                {showTrophies && <PlaceTrophy rank={e.rank} />}
                             </td>
                             <td className="num">{e.total}</td>
                             <td className="num">{e.standingsPoints}</td>
