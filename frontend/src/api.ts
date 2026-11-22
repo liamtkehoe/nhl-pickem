@@ -78,6 +78,7 @@ export interface AwardOption {
     description: string
     teamPick: boolean
     positions: string[]
+    rookiesOnly: boolean
 }
 
 export interface SeasonInfo {
@@ -93,6 +94,7 @@ export interface PlayerInfo {
     name: string
     team: string
     position: string
+    rookie: boolean
 }
 
 export interface PickOptions {

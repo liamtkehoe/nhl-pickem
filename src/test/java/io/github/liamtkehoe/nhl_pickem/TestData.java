@@ -38,9 +38,9 @@ public final class TestData {
 
     public static List<PlayerInfo> players() {
         return List.of(
-                new PlayerInfo(1, "Fake Center", "ANA", "C"),
-                new PlayerInfo(2, "Fake Defenseman", "BOS", "D"),
-                new PlayerInfo(3, "Fake Goalie", "BUF", "G"));
+                new PlayerInfo(1, "Fake Center", "ANA", "C", true),
+                new PlayerInfo(2, "Fake Defenseman", "BOS", "D", false),
+                new PlayerInfo(3, "Fake Goalie", "BUF", "G", false));
     }
 
     public static Map<Long, PlayerInfo> playersById() {

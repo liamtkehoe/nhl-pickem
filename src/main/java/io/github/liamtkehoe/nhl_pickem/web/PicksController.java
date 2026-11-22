@@ -43,7 +43,7 @@ public class PicksController {
 
     public record TeamOption(String team, String teamName, int currentPlace, int points, int gamesPlayed, Double line) {}
     public record DivisionOption(String division, List<TeamOption> teams) {}
-    public record AwardOption(Award award, String displayName, String description, boolean teamPick, List<String> positions) {}
+    public record AwardOption(Award award, String displayName, String description, boolean teamPick, boolean rookiesOnly, List<String> positions) {}
     public record PickOptions(int season, boolean open, List<DivisionOption> divisions, List<AwardOption> awards, List<PlayerInfo> players) {}
     public record SubmitResponse(Instant submittedAt) {}
 
@@ -62,8 +62,12 @@ public class PicksController {
                 .map(e -> new DivisionOption(e.getKey(), e.getValue()))
                 .toList();
 
+        List<PlayerInfo> players = snapshots.players(season);
+        boolean rookiesKnown = players.stream().anyMatch(PlayerInfo::rookie);
+
         List<AwardOption> awards = Arrays.stream(Award.values())
                 .map(a -> new AwardOption(a, a.displayName(), a.description(), a.isTeamPick(),
+                        a == Award.CALDER && rookiesKnown,
                         POSITIONS.stream().filter(a::allowsPosition).toList()))
                 .toList();
 
