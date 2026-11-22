@@ -62,7 +62,7 @@ export default function App() {
                         onSubmitted={() => setScreen({ name: 'dashboard', username: screen.username })}
                     />
                 )}
-                {screen.name === 'dashboard' && <Dashboard username={screen.username} />}
+                {screen.name === 'dashboard' && <Dashboard username={screen.username} season={season} />}
             </main>
         </div>
     )

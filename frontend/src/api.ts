@@ -87,6 +87,7 @@ export interface SeasonInfo {
     practice: boolean
     open: boolean
     picksCloseAt: string | null
+    finalized: boolean
 }
 
 export interface PlayerInfo {

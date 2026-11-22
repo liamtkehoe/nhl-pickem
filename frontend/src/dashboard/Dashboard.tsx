@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
-import { api, type LeaderboardEntry, type PickOptions, type PlayerScore } from '../api'
+import { api, type LeaderboardEntry, type PickOptions, type PlayerScore, type SeasonInfo } from '../api'
 import { Leaderboard } from './Leaderboard'
 import { ScoreBreakdown } from './ScoreBreakdown'
+import { SeasonSummary } from './SeasonSummary'
 import { StandingsView } from './StandingsView'
 import { ordinal, teamsByCode } from './shared'
 
@@ -17,9 +18,10 @@ const RELOAD_EVERY_MS = 5 * 60 * 1000
 
 interface Props {
     username: string
+    season: SeasonInfo | null
 }
 
-export function Dashboard({ username }: Props) {
+export function Dashboard({ username, season }: Props) {
     const [options, setOptions] = useState<PickOptions | null>(null)
     const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
     const [myScore, setMyScore] = useState<PlayerScore | null>(null)
@@ -28,6 +30,8 @@ export function Dashboard({ username }: Props) {
     const [error, setError] = useState<string | null>(null)
     const [refreshing, setRefreshing] = useState(false)
     const [loadedAt, setLoadedAt] = useState<Date | null>(null)
+    const [summaryDismissed, setSummaryDismissed] = useState(false)
+    const [summaryReopened, setSummaryReopened] = useState(false)
 
     const load = useCallback(async () => {
         try {
@@ -46,7 +50,6 @@ export function Dashboard({ username }: Props) {
         }
     }, [username])
 
-    //Loads immediately, then every 5 minutes while dashboard is open
     useEffect(() => {
         void load()
         const timer = setInterval(() => void load(), RELOAD_EVERY_MS)
@@ -78,12 +81,20 @@ export function Dashboard({ username }: Props) {
         }
     }
 
+    function closeSummary() {
+        setSummaryDismissed(true)
+        setSummaryReopened(false)
+    }
+
     if (!options || !myScore) {
         return error ? <p className="error">{error}</p> : <p>Loading…</p>
     }
 
     const teams = teamsByCode(options)
     const me = leaderboard.find(e => e.username.toLowerCase() === username.toLowerCase())
+    const finalized = season?.finalized ?? false
+    const autoSummary = finalized && !summaryDismissed
+    const showSummary = finalized && leaderboard.length > 0 && (autoSummary || summaryReopened)
 
     return (
         <div className="dashboard">
@@ -109,6 +120,11 @@ export function Dashboard({ username }: Props) {
                     </div>
                 </dl>
                 <div className="refresh">
+                    {finalized && (
+                        <button type="button" onClick={() => setSummaryReopened(true)}>
+                            Season summary
+                        </button>
+                    )}
                     <button type="button" onClick={refreshFromNhl} disabled={refreshing}>
                         {refreshing ? 'Refreshing…' : 'Refresh from NHL'}
                     </button>
@@ -150,10 +166,30 @@ export function Dashboard({ username }: Props) {
                 </>
             )}
             {tab === 'leaderboard' && !viewing && (
-                <Leaderboard entries={leaderboard} me={username} onSelect={name => void viewPlayer(name)} />
+                <Leaderboard
+                    entries={leaderboard}
+                    me={username}
+                    showTrophies={finalized}
+                    onSelect={name => void viewPlayer(name)}
+                />
             )}
 
             {tab === 'standings' && <StandingsView options={options} />}
+
+            {showSummary && (
+                <SeasonSummary
+                    entries={leaderboard}
+                    me={username}
+                    seasonLabel={season?.label ?? ''}
+                    celebrate={autoSummary}
+                    onClose={closeSummary}
+                    onSelect={name => {
+                        closeSummary()
+                        setTab('leaderboard')
+                        void viewPlayer(name)
+                    }}
+                />
+            )}
         </div>
     )
 }
