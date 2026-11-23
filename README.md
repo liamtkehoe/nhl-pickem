@@ -26,6 +26,7 @@ Requires Java 25 and Node.js.
 ./play.sh            # start the game and open http://localhost:8080
 ./play.sh --rebuild  # after pulling or changing code
 ```
+Or double-click `NHL Pickem.command` in Finder on macOS.
 
 Each start backs up `data/pickem.db` to `data/backups/` (the 10 newest are kept).
 
