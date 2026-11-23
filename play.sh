@@ -4,6 +4,13 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
+#Checks to see if app is already open
+if curl -sf http://localhost:8080/api/health > /dev/null; then
+  echo "NHL Pick'em is already running."
+  open http://localhost:8080
+  exit 0
+fi
+
 #1. Back up the database before anything touches it
 mkdir -p data/backups
 if [[ -f data/pickem.db ]]; then
