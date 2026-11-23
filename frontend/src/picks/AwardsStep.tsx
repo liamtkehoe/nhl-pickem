@@ -58,7 +58,7 @@ interface PlayerPickerProps {
     onChange: (playerId: number) => void
 }
 
-function PlayerPicker({ option, players, season, value, onChange }: PlayerPickerProps) {
+export function PlayerPicker({ option, players, season, value, onChange }: PlayerPickerProps) {
     const [query, setQuery] = useState('')
     const q = query.trim().toLowerCase()
     const matches = players.filter(
@@ -114,7 +114,7 @@ interface TeamPickerProps {
     onChange: (team: string) => void
 }
 
-function TeamPicker({ option, teams, value, onChange }: TeamPickerProps) {
+export function TeamPicker({ option, teams, value, onChange }: TeamPickerProps) {
     return (
         <div className="award-row">
             <TrophyImage award={option.award} name={option.displayName} />

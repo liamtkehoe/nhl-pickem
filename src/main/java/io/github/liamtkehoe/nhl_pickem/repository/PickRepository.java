@@ -33,7 +33,10 @@ public class PickRepository {
                 .param("s", seasonId)
                 .param("at", Db.text(submittedAt))
                 .update();
+        insertPicks(userId, seasonId, picks);
+    }
 
+    private void insertPicks(long userId, int seasonId, PickSet picks) {
         for (StandingsPick pick : picks.standings()) {
             jdbc.sql("INSERT INTO standings_picks (user_id, season_id, team, predicted_place) "
                             + "VALUES (:u, :s, :team, :place)")
@@ -120,5 +123,23 @@ public class PickRepository {
                         rs.getString("username"),
                         Db.instant(rs.getString("submitted_at"))))
                 .list();
+    }
+
+    //Removes every pick and submission a player has made, in every season
+    public void deleteAllFor(long userId) {
+        for (String table : List.of("award_picks", "ou_picks", "standings_picks", "submissions")) {
+            jdbc.sql("DELETE FROM " + table + " WHERE user_id = :u").param("u", userId).update();
+        }
+    }
+
+    //Swaps a player's picks for a season. The submission row, and its date, stay as they were
+    public void replacePicks(long userId, int seasonId, PickSet picks) {
+        for (String table : List.of("award_picks", "ou_picks", "standings_picks")) {
+            jdbc.sql("DELETE FROM " + table + " WHERE user_id = :u AND season_id = :s")
+                    .param("u", userId)
+                    .param("s", seasonId)
+                    .update();
+        }
+        insertPicks(userId, seasonId, picks);
     }
 }

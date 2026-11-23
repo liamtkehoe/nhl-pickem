@@ -113,3 +113,9 @@ CREATE TABLE IF NOT EXISTS player_stats (
     fetched_at           TEXT NOT NULL,
     PRIMARY KEY (season_id, player_id)
     );
+
+CREATE TABLE IF NOT EXISTS season_finals (
+    season_id     INTEGER PRIMARY KEY REFERENCES seasons(id),
+    finalized_at  TEXT NOT NULL,
+    finalized_by  TEXT NOT NULL
+    );

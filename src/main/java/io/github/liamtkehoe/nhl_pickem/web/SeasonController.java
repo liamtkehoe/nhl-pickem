@@ -18,13 +18,11 @@ public class SeasonController {
     private final SeasonRepository seasons;
     private final Clock clock;
     private final int season;
-    private final ScoreService scores;
 
-    public SeasonController(SeasonRepository seasons, Clock clock, ScoreService scores, @Value("${pickem.current-season}") int season) {
+    public SeasonController(SeasonRepository seasons, Clock clock, @Value("${pickem.current-season}") int season) {
         this.seasons = seasons;
         this.clock = clock;
         this.season = season;
-        this.scores = scores;
     }
 
     public record SeasonInfo(int id, String label, boolean practice, boolean open, Instant picksCloseAt, boolean finalized) {}
@@ -34,6 +32,6 @@ public class SeasonController {
         Season s = seasons.find(season)
                 .orElseThrow(() -> new NotFoundException("Season " + season + " isn't set up yet"));
 
-        return new SeasonInfo(s.id(), s.label(), s.practice(), s.isOpen(clock.instant()), s.picksCloseAt(), scores.seasonFinalized());
+        return new SeasonInfo(s.id(), s.label(), s.practice(), s.isOpen(clock.instant()), s.picksCloseAt(), seasons.finalizedAt(season).isPresent());
     }
 }

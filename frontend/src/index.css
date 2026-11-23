@@ -184,6 +184,12 @@ input, select {
 .place-trophy.gold { color: #d4af37; }
 .place-trophy.silver { color: #b8bec6; }
 .place-trophy.bronze { color: #cd7f32; }
+@media (max-width: 600px) {
+  .summary { grid-template-columns: 1fr; }
+  .refresh { justify-items: start; }
+  .award-row { grid-template-columns: 48px 1fr 48px; }
+  .trophy, .pick-image { width: 48px; height: 48px; }
+}
 
 /* Confetti */
 .confetti { position: fixed; inset: 0; z-index: 30; overflow: hidden; pointer-events: none; }
@@ -198,9 +204,19 @@ input, select {
   .confetti { display: none; }
 }
 
-@media (max-width: 600px) {
-  .summary { grid-template-columns: 1fr; }
-  .refresh { justify-items: start; }
-  .award-row { grid-template-columns: 48px 1fr 48px; }
-  .trophy, .pick-image { width: 48px; height: 48px; }
+/* Admin */
+button.danger { color: var(--bad); border-color: var(--bad); }
+.notice { color: var(--good); }
+.actions { display: flex; gap: 6px; justify-content: flex-end; }
+.brand-link { color: var(--text); font-size: 1rem; }
+.admin-finalize {
+  display: grid; gap: 8px; justify-items: start; margin-bottom: 20px; padding: 16px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+}
+.admin-finalize h3 { margin: 0; }
+.admin-fieldset { border: none; margin: 0; padding: 0; min-width: 0; }
+.admin-award { margin-bottom: 16px; }
+.admin-award-status {
+  display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;
+  gap: 8px; margin-bottom: 6px;
 }

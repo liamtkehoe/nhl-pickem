@@ -56,6 +56,7 @@ export interface LoginResponse {
     username: string
     created: boolean
     submittedAt: string | null
+    admin: boolean
 }
 
 export interface TeamOption {
@@ -159,7 +160,57 @@ export const api = {
     submitPicks: (picks: SubmitPicksRequest) => request<{ submittedAt: string }>('POST', '/api/picks', picks),
     leaderboard: () => request<LeaderboardEntry[]>('GET', '/api/leaderboard'),
     score: (username: string) => request<PlayerScore>('GET', `/api/scores/${encodeURIComponent(username)}`),
-    refresh: () => request<{ teams: number; players: number }>('POST', '/api/admin/refresh'),
+    refresh: () => request<{ teams: number; players: number }>('POST', '/api/refresh'),
     season: () => request<SeasonInfo>('GET', '/api/season'),
     signUp: (username: string) => request<LoginResponse>('POST', '/api/signup', { username }),
+}
+
+export interface SavedPicks {
+    standings: { team: string; predictedPlace: number }[]
+    overUnders: { team: string; pick: OverUnder }[]
+    awards: { award: Award; playerId: number | null; team: string | null; pickName: string }[]
+}
+
+export interface AdminUser {
+    id: number
+    username: string
+    createdAt: string
+    submittedAt: string | null
+}
+
+export interface AwardLeaderInfo {
+    award: Award
+    playerId: number | null
+    team: string | null
+    name: string | null
+    isFinal: boolean
+}
+
+export interface AwardStatus {
+    award: Award
+    displayName: string
+    official: AwardLeaderInfo | null
+    projected: AwardLeaderInfo | null
+}
+
+export function asApiError(e: unknown): ApiError {
+    if (e instanceof ApiError) return e
+    return new ApiError(0, e instanceof Error ? e.message : String(e))
+}
+
+const enc = encodeURIComponent
+
+export const adminApi = {
+    users: () => request<AdminUser[]>('GET', '/api/admin/users'),
+    deleteUser: (username: string) =>
+        request<{ deleted: string }>('DELETE', `/api/admin/users/${enc(username)}`),
+    picks: (username: string) => request<SavedPicks>('GET', `/api/admin/users/${enc(username)}/picks`),
+    replacePicks: (username: string, picks: SubmitPicksRequest) =>
+        request<SavedPicks>('PUT', `/api/admin/users/${enc(username)}/picks`, picks),
+    awards: () => request<AwardStatus[]>('GET', '/api/admin/awards'),
+    recordWinner: (award: Award, playerId: number | null, team: string | null) =>
+        request<AwardStatus[]>('PUT', '/api/admin/award-winners', { award, playerId, team }),
+    clearWinner: (award: Award) => request<AwardStatus[]>('DELETE', `/api/admin/award-winners/${award}`),
+    finalize: () => request<{ finalizedAt: string | null }>('POST', '/api/admin/season/finalize'),
+    unfinalize: () => request<{ finalizedAt: string | null }>('POST', '/api/admin/season/unfinalize'),
 }

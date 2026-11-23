@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -32,5 +33,19 @@ public class UserRepository {
                         rs.getString("username"),
                         Db.instant(rs.getString("created_at"))))
                 .optional();
+    }
+
+    public List<User> findAll() {
+        return jdbc.sql("SELECT id, username, created_at FROM users\n" +
+                        "ORDER BY username COLLATE NOCASE")
+                .query((rs, row) -> new User(
+                        rs.getLong("id"),
+                        rs.getString("username"),
+                        Db.instant(rs.getString("created_at"))))
+                .list();
+    }
+
+    public void delete(long userId) {
+        jdbc.sql("DELETE FROM users WHERE id = :id").param("id", userId).update();
     }
 }
