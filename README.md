@@ -36,13 +36,14 @@ Each start backs up `data/pickem.db` to `data/backups/` (the 10 newest are kept)
 - Tests: `./mvnw test` and `cd frontend && npm test`.
 
 ## Admin
+Most admin tasks live on the in-app Admin page; these commands do the same from Terminal.
 
 | Task | Command |
 | --- | --- |
-| Pull fresh NHL data | `curl -X POST localhost:8080/api/admin/refresh` |
-| Load a season's over/under lines (once) | `curl -X PUT localhost:8080/api/admin/lines -H 'Content-Type: application/json' --data @config/lines-2026-27.json` |
-| See an award's top candidates | `curl localhost:8080/api/admin/award-candidates/CALDER` |
-| Record a real winner (June) | `curl -X PUT localhost:8080/api/admin/award-winners -H 'Content-Type: application/json' -d '{"award":"HART","playerId":8478402}'` |
+| Pull fresh NHL data | `curl -X POST localhost:8080/api/refresh` |
+| Load a season's over/under lines (once) | `curl -X PUT localhost:8080/api/admin/lines -H 'Content-Type: application/json' --data @config/lines-2026-27.json -H 'X-Pickem-User: LiamKehoe'` |
+| See an award's top candidates | `curl localhost:8080/api/admin/award-candidates/CALDER -H 'X-Pickem-User: LiamKehoe'` |
+| Record a real winner (June) | `curl -X PUT localhost:8080/api/admin/award-winners -H 'Content-Type: application/json' -d '{"award":"HART","playerId":8478402}' -H 'X-Pickem-User: LiamKehoe'` |
 
 Award formula weights live in `config/award-weights.properties`; restart after changing them.
 

@@ -1,6 +1,5 @@
 package io.github.liamtkehoe.nhl_pickem.service;
 
-import io.github.liamtkehoe.nhl_pickem.model.Award;
 import io.github.liamtkehoe.nhl_pickem.model.Submission;
 import io.github.liamtkehoe.nhl_pickem.model.User;
 import io.github.liamtkehoe.nhl_pickem.repository.OULinesRepository;
@@ -13,7 +12,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -28,9 +26,8 @@ public class ScoreService {
     private final ScoringEngine engine;
     private final int season;
     private final int gamesInSeason;
-    private final boolean previewSummary;
 
-    public ScoreService(SnapshotRepository snapshots, OULinesRepository lines, PickRepository picks, AwardLeaderService awardLeaders, ScoringEngine engine, @Value("${pickem.current-season}") int season, @Value("${pickem.games-per-season}") int gamesInSeason, @Value("${pickem.preview-season-summary:false}") boolean previewSummary) {
+    public ScoreService(SnapshotRepository snapshots, OULinesRepository lines, PickRepository picks, AwardLeaderService awardLeaders, ScoringEngine engine, @Value("${pickem.current-season}") int season, @Value("${pickem.games-per-season}") int gamesInSeason) {
         this.snapshots = snapshots;
         this.lines = lines;
         this.picks = picks;
@@ -38,7 +35,6 @@ public class ScoreService {
         this.engine = engine;
         this.season = season;
         this.gamesInSeason = gamesInSeason;
-        this.previewSummary = previewSummary;
     }
 
     public SeasonState seasonState() {
@@ -69,19 +65,5 @@ public class ScoreService {
             return Optional.empty();
         }
         return Optional.of(engine.score(user.username(), picks.find(user.id(), season), seasonState()));
-    }
-
-    //True once every team has played out the season and every award has a final winner
-    public boolean seasonFinalized() {
-        if (previewSummary) {
-            return true;
-        }
-        SeasonState state = seasonState();
-        boolean everyGamePlayed = !state.standings().isEmpty()
-                && state.standings().stream().allMatch(t -> t.gamesPlayed() >= gamesInSeason);
-        boolean everyAwardFinal = Arrays.stream(Award.values())
-                .allMatch(award -> state.leaders().containsKey(award) && state.leaders().get(award).isFinal());
-
-        return everyGamePlayed && everyAwardFinal;
     }
 }

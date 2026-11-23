@@ -38,7 +38,7 @@ public class StandingsController {
 
     public record RefreshResult(int teams, int players, int stats) {}
 
-    @PostMapping("/admin/refresh")
+    @PostMapping("/refresh")
     public RefreshResult refresh() {
         return new RefreshResult(sync.syncStandings(), sync.syncRosters(), sync.syncStats());
     }

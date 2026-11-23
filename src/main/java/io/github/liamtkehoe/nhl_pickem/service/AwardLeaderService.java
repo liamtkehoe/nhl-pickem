@@ -37,11 +37,18 @@ public class AwardLeaderService {
         this.gamesInSeason = gamesInSeason;
     }
 
+    public Map<Award, AwardLeader> projectedLeaders(int seasonId) {
+        return formulas.leaders(stats.find(seasonId), snapshots.teams(seasonId), lines.find(seasonId), gamesInSeason);
+    }
+
+    public Map<Award, AwardLeader> officialWinners(int seasonId) {
+        return results.finals(seasonId);
+    }
+
     public Map<Award, AwardLeader> currentLeaders(int seasonId) {
         Map<Award, AwardLeader> leaders = new EnumMap<>(Award.class);
-        leaders.putAll(formulas.leaders(stats.find(seasonId), snapshots.teams(seasonId), lines.find(seasonId), gamesInSeason));
-        leaders.putAll(results.finals(seasonId));
-
+        leaders.putAll(projectedLeaders(seasonId));
+        leaders.putAll(officialWinners(seasonId));
         return leaders;
     }
 
@@ -62,12 +69,17 @@ public class AwardLeaderService {
             results.saveFinal(seasonId, award, null, request.team(), "MANUAL", clock.instant());
         } else {
             boolean known = request.playerId() != null
-                    && (stats.find(seasonId).stream().map(PlayerStats::playerId).anyMatch(request.playerId()::equals) || snapshots.players(seasonId).stream().map(PlayerInfo::playerId).anyMatch(request.playerId()::equals));
+                    && (stats.find(seasonId).stream().map(PlayerStats::playerId).anyMatch(request.playerId()::equals)
+                    || snapshots.players(seasonId).stream().map(PlayerInfo::playerId).anyMatch(request.playerId()::equals));
             if (!known) {
                 throw new InvalidRequestException(List.of("Unknown player: " + request.playerId()));
             }
             results.saveFinal(seasonId, award, request.playerId(), null, "MANUAL", clock.instant());
         }
+    }
+
+    public void clearWinner(int seasonId, Award award) {
+        results.delete(seasonId, award);
     }
 
     public List<AwardFormulas.Candidate> candidates(int seasonId, Award award, int limit) {

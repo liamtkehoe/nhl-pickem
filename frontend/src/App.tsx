@@ -1,44 +1,51 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { api, setCurrentUser, type LoginResponse, type SeasonInfo } from './api'
+import { AdminPage } from './admin/AdminPage'
+import { Dashboard } from './dashboard/Dashboard'
 import { LoginScreen } from './LoginScreen'
 import { PicksWizard } from './picks/PicksWizard'
-import { Dashboard } from './dashboard/Dashboard'
 import { ThemeToggle } from './ThemeToggle'
 
-type Screen =
-    | { name: 'login' }
-    | { name: 'picks'; username: string }
-    | { name: 'dashboard'; username: string }
+type Screen = 'login' | 'picks' | 'dashboard' | 'admin'
 
 export default function App() {
-    const [screen, setScreen] = useState<Screen>({ name: 'login' })
+    const [user, setUser] = useState<LoginResponse | null>(null)
+    const [screen, setScreen] = useState<Screen>('login')
     const [season, setSeason] = useState<SeasonInfo | null>(null)
 
-    useEffect(() => {
+    const loadSeason = useCallback(() => {
         api.season().then(setSeason).catch(() => setSeason(null))
     }, [])
 
-    function enter(user: LoginResponse) {
-        setCurrentUser(user.username)
-        setScreen(
-            user.submittedAt
-                ? { name: 'dashboard', username: user.username }
-                : { name: 'picks', username: user.username },
-        )
+    useEffect(() => {
+        loadSeason()
+    }, [loadSeason])
+
+    function enter(loggedIn: LoginResponse) {
+        setCurrentUser(loggedIn.username)
+        setUser(loggedIn)
+        setScreen(loggedIn.submittedAt ? 'dashboard' : 'picks')
     }
 
     function switchPlayer() {
         setCurrentUser(null)
-        setScreen({ name: 'login' })
+        setUser(null)
+        setScreen('login')
+    }
+
+    function goHome() {
+        setScreen(user?.submittedAt ? 'dashboard' : 'picks')
     }
 
     return (
         <div className="app">
             <ThemeToggle />
-            {screen.name !== 'login' && (
+            {user && screen !== 'login' && (
                 <header className="topbar">
                     <div className="brand">
-                        <strong>NHL Pick'em</strong>
+                        <button type="button" className="link brand-link" onClick={goHome}>
+                            <strong>NHL Pick'em</strong>
+                        </button>
                         {season && (
                             <span className="season-badge">
                 {season.label}
@@ -47,7 +54,15 @@ export default function App() {
                         )}
                     </div>
                     <span>
-            {screen.username} ·{' '}
+            {user.admin && screen !== 'admin' && (
+                <>
+                    <button type="button" className="link" onClick={() => setScreen('admin')}>
+                        Admin
+                    </button>
+                    {' · '}
+                </>
+            )}
+                        {user.username} ·{' '}
                         <button type="button" className="link" onClick={switchPlayer}>
               Switch player
             </button>
@@ -55,14 +70,20 @@ export default function App() {
                 </header>
             )}
             <main>
-                {screen.name === 'login' && <LoginScreen season={season} onLogin={enter} />}
-                {screen.name === 'picks' && (
+                {screen === 'login' && <LoginScreen season={season} onLogin={enter} />}
+                {user && screen === 'picks' && (
                     <PicksWizard
-                        username={screen.username}
-                        onSubmitted={() => setScreen({ name: 'dashboard', username: screen.username })}
+                        username={user.username}
+                        onSubmitted={() => {
+                            setUser({ ...user, submittedAt: new Date().toISOString() })
+                            setScreen('dashboard')
+                        }}
                     />
                 )}
-                {screen.name === 'dashboard' && <Dashboard username={screen.username} season={season} />}
+                {user && screen === 'dashboard' && <Dashboard username={user.username} season={season} />}
+                {user && screen === 'admin' && (
+                    <AdminPage me={user.username} season={season} onSeasonChanged={loadSeason} />
+                )}
             </main>
         </div>
     )

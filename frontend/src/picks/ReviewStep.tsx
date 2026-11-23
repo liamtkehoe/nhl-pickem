@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { api, ApiError, type PickOptions, type SubmitPicksRequest } from '../api'
+import { api, ApiError, type PickOptions } from '../api'
 import type { Draft } from './useDraft'
+import { findMissing, toRequest } from './draftRequest'
 
 interface Props {
     options: PickOptions
@@ -99,35 +100,4 @@ export function ReviewStep({ options, draft, onSubmitted }: Props) {
             </button>
         </section>
     )
-}
-
-function findMissing(options: PickOptions, draft: Draft): string[] {
-    const missing: string[] = []
-    for (const div of options.divisions) {
-        for (const t of div.teams) {
-            if (!draft.overUnders[t.team]) missing.push(`Over/under for ${t.teamName}`)
-        }
-    }
-    for (const a of options.awards) {
-        if (draft.awards[a.award] === undefined) missing.push(a.displayName)
-    }
-    return missing
-}
-
-function toRequest(options: PickOptions, draft: Draft): SubmitPicksRequest {
-    return {
-        standings: options.divisions.flatMap(div =>
-            (draft.order[div.division] ?? []).map((team, i) => ({ team, place: i + 1 })),
-        ),
-        overUnders: Object.entries(draft.overUnders).map(([team, pick]) => ({ team, pick })),
-        awards: options.awards.flatMap(a => {
-            const value = draft.awards[a.award]
-            if (value === undefined) return []
-            return [{
-                award: a.award,
-                playerId: typeof value === 'number' ? value : null,
-                team: typeof value === 'string' ? value : null,
-            }]
-        }),
-    }
 }

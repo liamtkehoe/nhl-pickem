@@ -52,4 +52,11 @@ public class AwardResultsRepository {
 
         return finals;
     }
+
+    public void delete(int seasonId, Award award) {
+        jdbc.sql("DELETE FROM award_results WHERE season_id = :s AND award = :award")
+                .param("s", seasonId)
+                .param("award", award.name())
+                .update();
+    }
 }
